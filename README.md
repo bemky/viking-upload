@@ -17,9 +17,9 @@ this.model.get('photos').on('add', () => this.model.save(null, {include: {photos
 
 ### Options
 ```javascript
-    thumbnailSize: string | WxH (default: '128x128')
-    defaults: {} | default parameters for new records
-    ajax: {} | default options for ajax
+    thumbnailSize: string // WxH (default: '128x128')
+    defaults: {} // default parameters for new records
+    ajax: {} // default options for ajax
     templates: {
         items:          ƒ(view)
         choose_file:    ƒ(view)
