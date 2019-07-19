@@ -15,7 +15,7 @@ new VikingUpload({
 this.model.get('photos').on('add', () => this.model.save(null, {include: {photos: true}}))
 ```
 
-###Options
+### Options
 ```javascript
     thumbnailSize: string | WxH (default: '128x128')
     defaults: {} | default parameters for new records
