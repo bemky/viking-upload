@@ -38,6 +38,5 @@ templates: {
 
 ### Events
 ```javascript
-add: (model, el) // after model item element is appended to items container
 upload: (model) // after successful upload
 ```
