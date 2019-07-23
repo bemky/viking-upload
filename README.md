@@ -1,6 +1,10 @@
 # Viking/Upload
 A Drag and Drop Upload UI for [Viking.js](https://github.com/malomalo/viking) Models
 
+
+![Viking Upload](https://cdn.dribbble.com/users/212179/screenshots/6812397/ezgif.com-video-to-gif_1_.gif)
+
+
 ```javascript
 import VikingUpload from 'viking-upload';
 
