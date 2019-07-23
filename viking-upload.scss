@@ -1,5 +1,25 @@
 $green: #4ebcb9;
 
+@mixin position-center(){
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+}
+@mixin position-fill() {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+$green: #4ebcb9;
+$blue: #3f91cd;
+$blue-bright: #1fa9ff;
+$gray: #B8C2CC;
+$red: #ff625f;
+
 .viking-upload {
     position:relative;
     .viking-upload-items{
@@ -21,8 +41,7 @@ $green: #4ebcb9;
             display:block;
         }
         .-thumbnail{
-            display:inline-block;
-            background: color('gray-darker');
+            background: darken($gray, 20);
             position:relative;
             color: white;
             img{
@@ -38,19 +57,28 @@ $green: #4ebcb9;
             box-shadow: inset 0 0 0 1px rgba(black, 0.2);
             content: "";
             @include position-fill;
+            z-index: 1;
+        }
+        .viking-upload-actions{
+            display: none;
+        }
+        &:hover{
+            .viking-upload-actions{
+                display: block;
+            }
         }
     }
     .viking-upload-drag-overlay{
         @include position-fill;
-        border: 2px dashed color('blue-bright');
+        border: 2px dashed $blue-bright;
         background: rgba(white, 0.5);
         line-height: 1;
-        color: rgba(color('gray-darkest'), 0.5);
+        color: rgba(darken($gray, 30), 0.5);
         font-weight: bold;
         font-size: 1.2em;
         &.active{
-            background: rgba(color('blue-bright'), 0.5);
-            color: color('blue');
+            background: rgba($blue-bright, 0.5);
+            color: $blue;
         }
         & > div {
             @include position-center;
@@ -62,8 +90,8 @@ $green: #4ebcb9;
         z-index:2;
         background: rgba(black, 0.5);
         color: white;
-        .-error{
-            background: rgba(color('red'), 0.7) !important;
+        &.-error{
+            background: rgba($red, 0.7) !important;
             font-family: monospace, monospace;
             line-height: 1;
             text-align: center;
@@ -77,8 +105,8 @@ $green: #4ebcb9;
     .viking-upload-choose{
         label{
             display:block;
-            border: 2px dashed color('gray');
-            color: color('gray');
+            border: 2px dashed $gray;
+            color: $gray;
             font-size: 0.8em;
             text-align: center;
             position:relative;
@@ -109,6 +137,22 @@ $green: #4ebcb9;
             background: linear-gradient(70deg, $green 3%, lighten($green, 10) 15%, $green 30%);
             background-size: 200% 100%;
             animation: gradientLoader 0.5s infinite linear;
+        }
+    }
+    .viking-upload-actions {
+        text-align: right;
+        position: absolute;
+        z-index: 3;
+        bottom: 0;
+        width: 100%;
+        padding-top:1em;
+        background: linear-gradient(rgba(black, 0), rgba(black, 0.3));
+        & > *{
+            display:inline-block;
+            opacity: 0.7;
+            &:hover{
+                opacity: 1;
+            }
         }
     }
 }

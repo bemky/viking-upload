@@ -18,6 +18,7 @@
         item_image:     ƒ(model, {height: 64, width: 64}) | return <img>
         item_uploading: ƒ(model) | <img> is replaced with rendered image tag, <progress> width set on_progress
         item_filename:  ƒ(model)
+        item_actions:   ƒ(model)
         item_error:     ƒ(errorMessage)
     }
 
@@ -36,6 +37,7 @@ export default Viking.View.extend({
         "dragenter":            "dragEnter",
         "dragleave":            "dragLeave",
         'change input:file':    "chooseFile",
+        'click .js-remove':     "removeItem"
     },
     
     options: {
@@ -49,7 +51,7 @@ export default Viking.View.extend({
     */
     templates: {
         items: (view) => `<div class="viking-upload-items"></div>`,
-        item: (model) => `<div class="viking-upload-item"><img></div`,
+        item: (model) => `<div class="viking-upload-item"><img></div>`,
         item_image: (model, thumbnail) => `<img src="#RENDER_URL" >`,
         item_filename: (model) => model.get('filename'),
         item_uploading: (model) => `
@@ -57,6 +59,31 @@ export default Viking.View.extend({
                 <div class="viking-upload-progress"><progress value="0" max="1"></progress></div>
             </div>
             <img>
+        `,
+        item_actions: (model) => `
+            <div class="viking-upload-actions">
+                <span class="js-remove" style="cursor:pointer">
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                    	 width="28px" height="28px" viewBox="0 0 28 28" enable-background="new 0 0 28 28" xml:space="preserve" fill="#FFFFFF">
+                    <path d="M11,11.5v9c0,0.146-0.047,0.266-0.141,0.359C10.766,20.952,10.646,21,10.5,21h-1c-0.146,0-0.266-0.047-0.359-0.141
+                        C9.048,20.766,9,20.646,9,20.5v-9c0-0.146,0.047-0.266,0.141-0.359C9.234,11.048,9.354,11,9.5,11h1c0.146,0,0.266,0.047,0.359,0.141
+                        C10.952,11.235,11,11.354,11,11.5z M15,11.5v9c0,0.146-0.047,0.266-0.141,0.359C14.766,20.952,14.646,21,14.5,21h-1
+                        c-0.146,0-0.266-0.047-0.359-0.141C13.048,20.766,13,20.646,13,20.5v-9c0-0.146,0.047-0.266,0.141-0.359
+                        C13.234,11.048,13.354,11,13.5,11h1c0.146,0,0.266,0.047,0.359,0.141C14.952,11.235,15,11.354,15,11.5z M19,11.5v9
+                        c0,0.146-0.047,0.266-0.141,0.359C18.766,20.952,18.646,21,18.5,21h-1c-0.146,0-0.266-0.047-0.359-0.141
+                        C17.048,20.766,17,20.646,17,20.5v-9c0-0.146,0.047-0.266,0.141-0.359C17.234,11.048,17.354,11,17.5,11h1
+                        c0.146,0,0.266,0.047,0.359,0.141C18.952,11.235,19,11.354,19,11.5z M21,22.812V8.001H7v14.812c0,0.23,0.036,0.441,0.109,0.633
+                        c0.073,0.193,0.148,0.335,0.227,0.424s0.133,0.133,0.164,0.133h13c0.031,0,0.086-0.044,0.164-0.133s0.154-0.229,0.227-0.424
+                        C20.965,23.254,21,23.043,21,22.812z M10.5,6h7l-0.75-1.828C16.678,4.078,16.589,4.021,16.484,4h-4.953
+                        c-0.104,0.021-0.193,0.078-0.266,0.172L10.5,6z M25,6.5v1c0,0.146-0.047,0.266-0.141,0.359C24.766,7.952,24.646,8,24.5,8H23v14.812
+                        c0,0.863-0.244,1.61-0.734,2.242c-0.488,0.629-1.078,0.943-1.766,0.943h-13c-0.688,0-1.276-0.305-1.766-0.914
+                        C5.244,24.477,5,23.738,5,22.874V7.999H3.5c-0.146,0-0.266-0.047-0.359-0.141C3.048,7.764,3,7.645,3,7.499v-1
+                        C3,6.353,3.047,6.233,3.141,6.14C3.235,6.047,3.354,6,3.5,5.999h4.828L9.422,3.39c0.156-0.385,0.438-0.713,0.844-0.984
+                        C10.673,2.135,11.084,2,11.5,2h5c0.416,0,0.828,0.135,1.234,0.406c0.406,0.271,0.688,0.599,0.844,0.984l1.094,2.609H24.5
+                        c0.146,0,0.266,0.047,0.359,0.141C24.952,6.234,25,6.354,25,6.5L25,6.5z"/>
+                    </svg>
+                </span>
+            </div>
         `,
         item_error: (errorMessage) =>  `
             <div class='viking-upload-overlay -error'>
@@ -88,7 +115,7 @@ export default Viking.View.extend({
         this.$el.append(this.item_container);
     
         this.choose_file = $(this.templates.choose_file(this));
-        this.item_container.append(this.item_container);
+        this.item_container.append(this.choose_file);
         
         this.collection.each(this.addItem, this);
 
@@ -130,20 +157,37 @@ export default Viking.View.extend({
     },
     
     addItem: function (model) {
+        var existing_el = this.$(`#${model.cid}`);
+        if(existing_el.length == 0) {
+            existing_el = $('<div>');
+            existing_el.appendTo(this.item_container);
+            this.choose_file.appendTo(this.item_container); // Move chooser to end
+        }
         var el = $(this.templates.item(model));
+        existing_el.replaceWith(el);
+        el.attr('id', model.cid);
+        el.append(this.templates.item_actions(model));
+
         if (el.find('img').length > 0)
             el.find('img').replaceWith(this.itemImageTag.bind(this)(model));
-        
+
         if (model.get('id')) {
             this.trigger('add', model, el);
         } else {
             el.append(this.templates.item_uploading(model));
         }
-        
+
         this.listenTo(model, 'remove', () => el.remove());
-        this.item_container.append(el);
-        this.choose_file.appendTo(this.item_container); // Move chooser to end
+        this.listenTo(model, 'error', (errorMessage) => el.append(this.templates.item_error(errorMessage)));
+        this.listenTo(model, 'progress', (percentage) => el.find('progress').width(90 * percentage + "%"));
+
         return el;
+    },
+    
+    removeItem: function(e){
+        var id = $(e.currentTarget).parents('[id]').attr('id');
+        this.collection.remove(id);
+        return false;
     },
     
     itemImageTag: function (model) {
@@ -178,7 +222,7 @@ export default Viking.View.extend({
     uploadFile: function (file) {
         var model = new this.collection.model();
         model.file = file;
-        var item_el = this.addItem(model);
+        this.addItem(model);
         
         // TODO check file type
         
@@ -193,22 +237,27 @@ export default Viking.View.extend({
             processData: false,
             contentType: false,
             error: (errorMessage) => {
-                item_el.append(this.templates.item_error(errorMessage));
+                model.trigger('error', errorMessage);
             },
             success: function(response){
                 model.set(response);
                 model.trigger('sync');
-                item_el.remove();
-                this.collection.add(model);
             }.bind(this),
-            complete: function (){
+            complete: function (xhr){
                 this.polls = _.without(this.polls, model);
+                if(this.collection.get(model.get('id'))){
+                    this.addItem(model);
+                    model.trigger('error', 'Duplicate');
+                } else {
+                    this.collection.add(model);
+                }
+                
                 if (this.polls.length == 0) this.collection.trigger('upload', model);
             }.bind(this),
             xhr: function () {
                 var xhr = $.ajaxSettings.xhr();
                 xhr.upload.onprogress = () => {
-                    item_el.find('progress').width(e.loaded / e.total * 90 + "%");
+                    model.trigger('progress', e.loaded / e.total);
                 };
                 return xhr;
             }
@@ -277,6 +326,6 @@ export default Viking.View.extend({
     dragDrop: function (e) {
         e.preventDefault();
         ([...e.originalEvent.dataTransfer.files]).forEach(this.uploadFile, this);
-    },
+    }
     
 })
